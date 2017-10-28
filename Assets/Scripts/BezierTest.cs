@@ -91,7 +91,7 @@ public class BezierTest : MonoBehaviour
                     controlPoints[2].position - controlPoints[3].position,
                     controlPoints[3].position - controlPoints[1].position);
                 float angleFactor = Mathf.Min(1, 10f / (angleBetweenlastAndMid + 0.1f));
-                print("angle factor " + angleFactor);
+                //print("angle factor " + angleFactor);
                 float mag = (controlPoints[2].position - controlPoints[3].position).magnitude * angleFactor;
                 firstPoint = midPoint - (controlPoints[3].position - controlPoints[1].position).normalized * mag;
                 secondPoint = midPoint + (controlPoints[3].position - controlPoints[1].position).normalized * mag;
