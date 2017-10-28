@@ -119,19 +119,27 @@ public class BasicBezier : MonoBehaviour
         return p;
     }
 
-    public int GetPoint(float _dis)
+    public int GetPoint(int _id, float _step, Vector3 _offset)
     {
+        GetAllPoints();
+
         float sumDis = 0;
-        int i = 1;
-        for (; i < m_curvePoints.Count; ++i)
+        int i = _id;
+        sumDis += (m_curvePoints[i + 1] - (m_curvePoints[i] + _offset)).magnitude;
+        if (sumDis > _step)
+            return _id;
+
+        i++;
+        for (; i < m_curvePoints.Count - 1; ++i)
         {
-            sumDis += (m_curvePoints[i] - m_curvePoints[i - 1]).magnitude;
-            if(sumDis > _dis)
+            sumDis += (m_curvePoints[i + 1] - m_curvePoints[i]).magnitude;
+            if (sumDis > _step)
             {
-                i--;
                 break;
             }
         }
+
+        print("_id " + _id + " i " + i + " sum " + sumDis + " _dis " + _step);
 
         return i;
     }
