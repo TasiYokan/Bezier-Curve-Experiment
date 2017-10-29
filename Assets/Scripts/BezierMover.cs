@@ -51,6 +51,7 @@ public class BezierMover : MonoBehaviour
             m_curId = bezierPath.GetPoint(m_curId, speed, ref m_offset);
 
             transform.position = bezierPath.CurvePoints[m_curId] + m_offset;
+            transform.forward = bezierPath.GetCurveVector(m_curId, speed.Sgn());
             yield return null;
         }
 
