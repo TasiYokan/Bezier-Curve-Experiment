@@ -3,10 +3,11 @@ using System.Collections;
 
 public class BezierMover : MonoBehaviour
 {
-    public BasicBezier path;
+    public BasicBezier bezierPath;
     public float speed;
-    public int curId = 0;
-    private Vector3 offset;
+    private int m_curId = 0;
+    // Offset from corresponding curve point 
+    private Vector3 m_offset;
 
     // Use this for initialization
     void Start()
@@ -17,46 +18,42 @@ public class BezierMover : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (path.CurvePoints != null && curId < path.CurvePoints.Count)
+        // Force to update position in case we change the path at runtime
+        if (bezierPath.WithinCurveRange(m_curId))
         {
-            transform.position = path.CurvePoints[curId] + offset;
+            transform.position = bezierPath.CurvePoints[m_curId] + m_offset;
 
-            Debug.DrawLine(path.CurvePoints[curId], transform.position, Color.green);
+            // If the offset is too tiny, we could hardly notice it actually
+            //Debug.DrawLine(path.CurvePoints[curId], transform.position, Color.green);
         }
 
-        if(Input.GetKey(KeyCode.UpArrow))
+        // For debug
+        if (Input.GetKey(KeyCode.UpArrow))
         {
             speed += 0.001f;
         }
-        else if(Input.GetKey(KeyCode.DownArrow))
+        else if (Input.GetKey(KeyCode.DownArrow))
         {
             speed -= 0.001f;
         }
-        speed = Mathf.Max(0, speed);
+        //speed = Mathf.Max(0, speed);
     }
 
     private IEnumerator MoveAlongPath()
     {
         yield return null;
 
-        while (curId < path.CurvePoints.Count - 1)
+        while (bezierPath.WithinCurveRange(m_curId) 
+            && bezierPath.NotGoingToOutOfRange(m_curId, speed.Sgn()))
         {
-            int previousId = curId;
-            curId = path.GetPoint(curId, speed, offset);
-            print("id is " + curId);
+            int previousId = m_curId;
+            //print("id is " + m_curId);
+            m_curId = bezierPath.GetPoint(m_curId, speed, ref m_offset);
 
-            if (curId == previousId && curId < path.CurvePoints.Count - 1)
-            {
-                offset = (path.CurvePoints[curId + 1] - path.CurvePoints[curId]) 
-                    * Mathf.Clamp01((offset.magnitude +speed)/ (path.CurvePoints[curId + 1] - path.CurvePoints[curId]).magnitude);
-            }
-            else
-            {
-                offset = Vector3.zero;
-            }
-
-            transform.position = path.CurvePoints[curId] + offset;
+            transform.position = bezierPath.CurvePoints[m_curId] + m_offset;
             yield return null;
         }
+
+        print("Finish moving");
     }
 }

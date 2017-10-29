@@ -15,6 +15,8 @@ public class BasicBezier : MonoBehaviour
     {
         get
         {
+            if (m_curvePoints == null)
+                m_curvePoints = new List<Vector3>();
             return m_curvePoints;
         }
 
@@ -25,7 +27,7 @@ public class BasicBezier : MonoBehaviour
     }
 
     // Use this for initialization
-    void Start()
+    void Awake()
     {
         List<Component> components = new List<Component>(this.GetComponentsInChildren(typeof(Transform)));
         controlPoints = components.ConvertAll(c => (Transform)c);
@@ -37,8 +39,27 @@ public class BasicBezier : MonoBehaviour
             lineRenderer = GetComponent<LineRenderer>();
         }
 
-        m_curvePoints = new List<Vector3>();
         realControlPoints = new List<Vector3>();
+    }
+
+    public bool WithinCurveRange(int _id)
+    {
+        return _id >= 0 && _id < CurvePoints.Count;
+    }
+
+    public bool AtCurveEnds(int _id)
+    {
+        return _id == 0 || _id == CurvePoints.Count - 1;
+    }
+
+    public bool NotGoingToOutOfRange(int _id, int _step)
+    {
+        return _id + _step >= 0 && _id + _step < CurvePoints.Count;
+    }
+
+    public Vector3 GetCurveVector(int _id, int _step)
+    {
+        return CurvePoints[_id + _step] - CurvePoints[_id];
     }
 
     void Update()
@@ -119,27 +140,52 @@ public class BasicBezier : MonoBehaviour
         return p;
     }
 
-    public int GetPoint(int _id, float _step, Vector3 _offset)
+    public int GetPoint(int _id, float _speedInAFrame, ref Vector3 _offset)
     {
+        if (_speedInAFrame.Sgn() == 0)
+        {
+            return _id;
+        }
+
+        // Is this necessary?
         GetAllPoints();
 
-        float sumDis = 0;
+        int step = _speedInAFrame.Sgn();
+        float totalDistance = 0;
         int i = _id;
-        sumDis += (m_curvePoints[i + 1] - (m_curvePoints[i] + _offset)).magnitude;
-        if (sumDis > _step)
-            return _id;
 
-        i++;
-        for (; i < m_curvePoints.Count - 1; ++i)
+        float offsetLength = _offset.magnitude;
+        if (Vector3.Dot(_offset, GetCurveVector(i, 1)).Sgn() < 0)
         {
-            sumDis += (m_curvePoints[i + 1] - m_curvePoints[i]).magnitude;
-            if (sumDis > _step)
+            offsetLength = -offsetLength;
+        }
+
+        while (totalDistance.FloatLess(step * (_speedInAFrame + offsetLength)))
+        {
+            i += step;
+            if (WithinCurveRange(i))
             {
-                break;
+                totalDistance += (m_curvePoints[i] - m_curvePoints[i - step]).magnitude;
+            }
+            else
+            {
+                _offset = Vector3.zero;
+                return i - step;
             }
         }
 
-        print("_id " + _id + " i " + i + " sum " + sumDis + " _dis " + _step);
+        i -= step;
+
+        if (i == _id)
+        {
+            _offset = GetCurveVector(i, step) * Mathf.Clamp01(step * (_speedInAFrame + offsetLength) / totalDistance);
+        }
+        else
+        {
+            Vector3 curVector = GetCurveVector(i, step);
+            _offset = curVector *
+                Mathf.Clamp01(curVector.magnitude - (totalDistance - (_speedInAFrame + offsetLength)) / curVector.magnitude);
+        }
 
         return i;
     }
