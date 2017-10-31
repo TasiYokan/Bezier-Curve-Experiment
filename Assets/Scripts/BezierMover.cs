@@ -47,8 +47,8 @@ public class BezierMover : MonoBehaviour
             && bezierPath.NotGoingToOutOfRange(m_curId, speed.Sgn()))
         {
             int previousId = m_curId;
-            //print("id is " + m_curId);
             m_curId = bezierPath.GetPoint(m_curId, speed, ref m_offset);
+            //print("id is " + m_curId + " offset " + m_offset.magnitude);
 
             transform.position = bezierPath.CurvePoints[m_curId] + m_offset;
             if (bezierPath.NotGoingToOutOfRange(m_curId, speed.Sgn()))

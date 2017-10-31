@@ -152,6 +152,7 @@ public class BasicBezier : MonoBehaviour
 
         int step = _speedInAFrame.Sgn();
         float totalDistance = 0;
+        float previousDistance = 0;
         int i = _id;
 
         float offsetLength = _offset.magnitude;
@@ -165,6 +166,7 @@ public class BasicBezier : MonoBehaviour
             i += step;
             if (WithinCurveRange(i))
             {
+                previousDistance = totalDistance;
                 totalDistance += (m_curvePoints[i] - m_curvePoints[i - step]).magnitude;
             }
             else
@@ -178,13 +180,13 @@ public class BasicBezier : MonoBehaviour
 
         if (i == _id)
         {
-            _offset = GetCurveVector(i, step) * Mathf.Clamp01(step * (_speedInAFrame + offsetLength) / totalDistance);
+            _offset = GetCurveVector(i, step) * Mathf.Clamp01(step * (_speedInAFrame + offsetLength - previousDistance) / (totalDistance - previousDistance));
         }
         else
         {
             Vector3 curVector = GetCurveVector(i, step);
             _offset = curVector *
-                Mathf.Clamp01(curVector.magnitude - (totalDistance - (_speedInAFrame + offsetLength)) / curVector.magnitude);
+                Mathf.Clamp01((curVector.magnitude - (totalDistance - (_speedInAFrame + offsetLength))) / curVector.magnitude);
         }
 
         return i;
