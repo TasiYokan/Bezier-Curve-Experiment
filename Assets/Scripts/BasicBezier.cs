@@ -105,8 +105,8 @@ public class BasicBezier : MonoBehaviour
             realControlPoints.Add(controlPoints[i].position);
         }
 
-        m_curvePoints.Clear();
-        for (int i = 1; i <= SEGMENT_COUNT; i++)
+        CurvePoints.Clear();
+        for (int i = 0; i <= SEGMENT_COUNT; i++)
         {
             float t = i / (float)SEGMENT_COUNT;
             Vector3 points = CalculateCubicBezierPoint(
@@ -116,7 +116,7 @@ public class BasicBezier : MonoBehaviour
                 realControlPoints[2],
                 realControlPoints[3]);
 
-            m_curvePoints.Add(points);
+            CurvePoints.Add(points);
         }
 
 

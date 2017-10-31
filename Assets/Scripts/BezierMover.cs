@@ -43,7 +43,7 @@ public class BezierMover : MonoBehaviour
     {
         yield return null;
 
-        while (bezierPath.WithinCurveRange(m_curId) 
+        while (bezierPath.WithinCurveRange(m_curId)
             && bezierPath.NotGoingToOutOfRange(m_curId, speed.Sgn()))
         {
             int previousId = m_curId;
@@ -51,7 +51,8 @@ public class BezierMover : MonoBehaviour
             m_curId = bezierPath.GetPoint(m_curId, speed, ref m_offset);
 
             transform.position = bezierPath.CurvePoints[m_curId] + m_offset;
-            transform.forward = bezierPath.GetCurveVector(m_curId, speed.Sgn());
+            if (bezierPath.NotGoingToOutOfRange(m_curId, speed.Sgn()))
+                transform.forward = bezierPath.GetCurveVector(m_curId, speed.Sgn());
             yield return null;
         }
 
