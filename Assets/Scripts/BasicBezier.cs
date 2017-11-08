@@ -11,6 +11,8 @@ public class BasicBezier : MonoBehaviour
     private List<Vector3> m_curvePoints;
     private List<Vector3> realControlPoints;
 
+    public bool autoConnect;
+
     public List<Vector3> CurvePoints
     {
         get
@@ -102,6 +104,7 @@ public class BasicBezier : MonoBehaviour
 
         for (int i = 0; i < 4; ++i)
         {
+            controlPoints[i].name = "Point (" + i + ")";
             realControlPoints.Add(controlPoints[i].position);
         }
 
@@ -119,12 +122,52 @@ public class BasicBezier : MonoBehaviour
             CurvePoints.Add(points);
         }
 
+        if (autoConnect)
+        {
+            if(controlPoints.Count <= 4)
+            {
+                GameObject obj1 = Instantiate(Resources.Load("Point"),
+                    2 * realControlPoints[0] - realControlPoints[1], Quaternion.identity, transform) as GameObject;
+                obj1.name = "Point (4)";
+                obj1.GetComponent<ControlPoint>().coHandle = controlPoints[1];
+                obj1.GetComponent<ControlPoint>().anchor = controlPoints[0];
+                controlPoints.Add(obj1.transform);
+                controlPoints[1].GetComponent<ControlPoint>().coHandle = controlPoints[4];
+                controlPoints[1].GetComponent<ControlPoint>().anchor = controlPoints[0];
+
+                GameObject obj2 = Instantiate(Resources.Load("Point"),
+                    2 * realControlPoints[3] - realControlPoints[2], Quaternion.identity, transform) as GameObject;
+                obj2.name = "Point (5)";
+                obj2.GetComponent<ControlPoint>().coHandle = controlPoints[2];
+                obj2.GetComponent<ControlPoint>().anchor = controlPoints[3];
+                controlPoints.Add(obj2.transform);
+                controlPoints[2].GetComponent<ControlPoint>().coHandle = controlPoints[5];
+                controlPoints[2].GetComponent<ControlPoint>().anchor = controlPoints[3];
+            }
+
+            realControlPoints.Add(controlPoints[4].position);
+            realControlPoints.Add(controlPoints[5].position);
+
+            for (int i = 0; i <= SEGMENT_COUNT; i++)
+            {
+                float t = i / (float)SEGMENT_COUNT;
+                Vector3 points = CalculateCubicBezierPoint(
+                    t,
+                    realControlPoints[3],
+                    realControlPoints[5],
+                    realControlPoints[4],
+                    realControlPoints[0]);
+
+                CurvePoints.Add(points);
+            }
+        }
+
 
         Debug.DrawLine(realControlPoints[1], realControlPoints[0], Color.red);
         Debug.DrawLine(realControlPoints[3], realControlPoints[2], Color.red);
     }
 
-    Vector3 CalculateCubicBezierPoint(float t, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
+    Vector3 CalculateCubicBezierPoint(float t, Vector3 _startAnchor, Vector3 _startHandle, Vector3 _endHandle, Vector3 _endAnchor)
     {
         float u = 1 - t;
         float tt = t * t;
@@ -132,10 +175,10 @@ public class BasicBezier : MonoBehaviour
         float uuu = uu * u;
         float ttt = tt * t;
 
-        Vector3 p = uuu * p0;
-        p += 3 * uu * t * p1;
-        p += 3 * u * tt * p2;
-        p += ttt * p3;
+        Vector3 p = uuu * _startAnchor;
+        p += 3 * uu * t * _startHandle;
+        p += 3 * u * tt * _endHandle;
+        p += ttt * _endAnchor;
 
         return p;
     }
