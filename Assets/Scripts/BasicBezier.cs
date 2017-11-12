@@ -229,7 +229,7 @@ public class BasicBezier : MonoBehaviour
         {
             Vector3 curVector = GetCurveVector(i, step);
             _offset = curVector *
-                Mathf.Clamp01((curVector.magnitude - (totalDistance - (_speedInAFrame + offsetLength))) / curVector.magnitude);
+                Mathf.Clamp01((curVector.magnitude - (totalDistance - step * (_speedInAFrame + offsetLength))) / curVector.magnitude);
         }
 
         return i;
