@@ -28,6 +28,7 @@ public class GameObjectDragAndDrop : MonoBehaviour
         if (Input.GetMouseButtonUp(0))
         {
             isMouseDrag = false;
+
             target.GetComponent<ControlPoint>().isUnderControl = false;
         }
 
@@ -41,7 +42,17 @@ public class GameObjectDragAndDrop : MonoBehaviour
 
             //It will update target gameobject's current postion.
             target.transform.position = currentPosition;
+
             target.GetComponent<ControlPoint>().isUnderControl = true;
+
+            if (Input.GetKey(KeyCode.LeftShift))
+            {
+                target.GetComponent<ControlPoint>().isForce = true;
+            }
+            else
+            {
+                target.GetComponent<ControlPoint>().isForce = false;
+            }
         }
 
     }
