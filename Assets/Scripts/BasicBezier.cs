@@ -61,7 +61,7 @@ public class BasicBezier : MonoBehaviour
 
     public Vector3 GetCurveVector(int _id, int _step)
     {
-        return CurvePoints[_id + _step] - CurvePoints[_id];
+        return CurvePoints[(CurvePoints.Count + _id + _step) % CurvePoints.Count] - CurvePoints[(CurvePoints.Count + _id) % CurvePoints.Count];
     }
 
     void Update()
@@ -124,7 +124,7 @@ public class BasicBezier : MonoBehaviour
 
         if (autoConnect)
         {
-            if(controlPoints.Count <= 4)
+            if (controlPoints.Count <= 4)
             {
                 GameObject obj1 = Instantiate(Resources.Load("Point"),
                     2 * realControlPoints[0] - realControlPoints[1], Quaternion.identity, transform) as GameObject;
@@ -148,7 +148,7 @@ public class BasicBezier : MonoBehaviour
             realControlPoints.Add(controlPoints[4].position);
             realControlPoints.Add(controlPoints[5].position);
 
-            for (int i = 0; i <= SEGMENT_COUNT; i++)
+            for (int i = 1; i <= SEGMENT_COUNT-1; i++)
             {
                 float t = i / (float)SEGMENT_COUNT;
                 Vector3 points = CalculateCubicBezierPoint(
@@ -207,10 +207,10 @@ public class BasicBezier : MonoBehaviour
         while (totalDistance.FloatLess(step * (_speedInAFrame + offsetLength)))
         {
             i += step;
-            if (WithinCurveRange(i))
+            if (WithinCurveRange(i) || autoConnect)
             {
                 previousDistance = totalDistance;
-                totalDistance += (m_curvePoints[i] - m_curvePoints[i - step]).magnitude;
+                totalDistance += GetCurveVector(i, -step).magnitude;//(m_curvePoints[i] - m_curvePoints[i - step]).magnitude;
             }
             else
             {
@@ -223,7 +223,8 @@ public class BasicBezier : MonoBehaviour
 
         if (i == _id)
         {
-            _offset = GetCurveVector(i, step) * Mathf.Clamp01(step * (_speedInAFrame + offsetLength - previousDistance) / (totalDistance - previousDistance));
+            Vector3 curVector = GetCurveVector(i, step);
+            _offset = curVector * Mathf.Clamp01(step * (_speedInAFrame + offsetLength - previousDistance) / curVector.magnitude);
         }
         else
         {

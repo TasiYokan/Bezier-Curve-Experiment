@@ -43,17 +43,33 @@ public class BezierMover : MonoBehaviour
     {
         yield return null;
 
-        while (bezierPath.WithinCurveRange(m_curId)
-            && bezierPath.NotGoingToOutOfRange(m_curId, speed.Sgn()))
+        if (bezierPath.autoConnect == false)
         {
-            int previousId = m_curId;
-            m_curId = bezierPath.GetPoint(m_curId, speed, ref m_offset);
-            //print("id is " + m_curId + " offset " + m_offset.magnitude);
+            while (bezierPath.WithinCurveRange(m_curId)
+                && bezierPath.NotGoingToOutOfRange(m_curId, speed.Sgn()))
+            {
+                int previousId = m_curId;
+                m_curId = bezierPath.GetPoint(m_curId, speed, ref m_offset);
+                //print("id is " + m_curId + " offset " + m_offset.magnitude);
 
-            transform.position = bezierPath.CurvePoints[m_curId] + m_offset;
-            if (bezierPath.NotGoingToOutOfRange(m_curId, speed.Sgn()))
+                transform.position = bezierPath.CurvePoints[m_curId] + m_offset;
+                if (bezierPath.NotGoingToOutOfRange(m_curId, speed.Sgn()))
+                    transform.forward = bezierPath.GetCurveVector(m_curId, speed.Sgn());
+                yield return null;
+            }
+        }
+        else
+        {
+            while (true)
+            {
+                int previousId = m_curId;
+                m_curId = bezierPath.GetPoint(m_curId, speed, ref m_offset);
+                //print("id is " + m_curId + " offset " + m_offset.magnitude);
+
+                transform.position = bezierPath.CurvePoints[(m_curId + bezierPath.CurvePoints.Count) % bezierPath.CurvePoints.Count] + m_offset;
                 transform.forward = bezierPath.GetCurveVector(m_curId, speed.Sgn());
-            yield return null;
+                yield return null;
+            }
         }
 
         print("Finish moving");
