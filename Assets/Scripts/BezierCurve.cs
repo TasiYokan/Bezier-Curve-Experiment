@@ -56,7 +56,7 @@ public class BezierCurve : MonoBehaviour
         foreach (var frag in m_fragments)
         {
             frag.UpdateSamplePos();
-            totalPos += frag.SampleCount - 1;
+            totalPos += frag.InitSampleCount - 1;
         }
 
         totalPos++;
@@ -77,14 +77,14 @@ public class BezierCurve : MonoBehaviour
         m_lineRenderer.SetPosition(totalPos - 1, lastFragPoses[lastFragPoses.Count - 1]);
     }
 
-    public void GetCurvePos(ref int _FragId, ref int _SampleId, float _speed, ref Vector3 _offset)
+    public void GetCurvePos(ref int _fragId, ref int _sampleId, float _speed, ref Vector3 _offset)
     {
         float offsetLength = Vector3.Dot(
-            m_fragments[_FragId].GetSampleVector(_SampleId, _speed.Sgn()).normalized, _offset);
+            GetSampleVectorAmongAllFrags(_fragId, _sampleId, _speed.Sgn()).normalized, _offset);
 
         float remainLength = _speed + offsetLength;
-        int curFragId = _FragId;
-        int curSampleId = _SampleId;
+        int curFragId = _fragId;
+        int curSampleId = _sampleId;
 
         while (remainLength.Sgn() != 0)
         {
@@ -112,7 +112,29 @@ public class BezierCurve : MonoBehaviour
                 break;
         }
 
-        _FragId = curFragId;
-        _SampleId = curSampleId;
+        _fragId = curFragId;
+        _sampleId = curSampleId;
+    }
+
+    private Vector3 GetSampleVectorAmongAllFrags(int _fragId, int _sampleId, int _step)
+    {
+        int fragId = _fragId;
+        int sampleId = _sampleId;
+
+        if (m_fragments[fragId].WithinFragment(sampleId + _step) == false)
+        {
+            if (isAutoConnect)
+            {
+                fragId = (fragId + _step + m_fragments.Count) % m_fragments.Count;
+                sampleId = _step > 0 ? 0 : m_fragments[fragId].SampleCount - 1;
+            }
+            else
+            {
+                // Fallback: return the nearest vector
+                return m_fragments[fragId].GetSampleVector(sampleId - _step, _step);
+            }
+        }
+
+        return m_fragments[fragId].GetSampleVector(sampleId, _step);
     }
 }
