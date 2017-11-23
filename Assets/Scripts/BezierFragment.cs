@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.Assertions;
 
 /// <summary>
 /// Single fragment curve with 2 points which consists the whole curve
@@ -74,5 +75,51 @@ public class BezierFragment
             + 3 * u * t2 * endPoint.SecondaryHandle.Position;
 
         return p;
+    }
+
+    public int GetSampleId(int _startId, ref float _remainLength)
+    {
+        if (Mathf.Abs(_remainLength).Sgn() == 0)
+            return _startId;
+
+        int step = _remainLength.Sgn();
+        float totalDistance = 0;
+        float previousDistance = 0;
+
+        //float offsetLength =
+        //    Vector3.Cross(_offset, GetSampleVector(_startId, step)).magnitude;
+
+        int curId = _startId;
+        while (totalDistance.FloatLess(Mathf.Abs(_remainLength)))
+        {
+            previousDistance = totalDistance;
+
+            if (WithinFragment(curId + step))
+            {
+                totalDistance += GetSampleVector(curId, step).magnitude;
+            }
+            else
+            {
+                // Even the remain length/moving speed can't cover offset
+                _remainLength -= step * previousDistance;
+                return curId;
+            }
+            curId += step;
+        }
+
+        _remainLength -= step * previousDistance;
+        return curId - step;
+    }
+
+    public Vector3 GetSampleVector(int _id, int _step)
+    {
+        Assert.IsTrue(WithinFragment(_id + _step));
+
+        return m_samplePos[_id + _step] - m_samplePos[_id];
+    }
+
+    public bool WithinFragment(int _id)
+    {
+        return _id >= 0 && _id < m_samplePos.Count;
     }
 }

@@ -13,6 +13,14 @@ public class BezierCurve : MonoBehaviour
 
     public int totalSampleCount = 10;
 
+    public List<BezierFragment> Fragments
+    {
+        get
+        {
+            return m_fragments;
+        }
+    }
+
     // Use this for initialization
     void Start()
     {
@@ -67,5 +75,44 @@ public class BezierCurve : MonoBehaviour
 
         List<Vector3> lastFragPoses = m_fragments[m_fragments.Count - 1].SamplePos;
         m_lineRenderer.SetPosition(totalPos - 1, lastFragPoses[lastFragPoses.Count - 1]);
+    }
+
+    public void GetCurvePos(ref int _FragId, ref int _SampleId, float _speed, ref Vector3 _offset)
+    {
+        float offsetLength = Vector3.Dot(
+            m_fragments[_FragId].GetSampleVector(_SampleId, _speed.Sgn()).normalized, _offset);
+
+        float remainLength = _speed + offsetLength;
+        int curFragId = _FragId;
+        int curSampleId = _SampleId;
+
+        while (remainLength.Sgn() != 0)
+        {
+            curSampleId = m_fragments[curFragId].GetSampleId(
+                curSampleId, ref remainLength);
+
+            if (m_fragments[curFragId].WithinFragment(curSampleId + remainLength.Sgn()) == false)
+            {
+                curFragId += remainLength.Sgn();
+
+                if (isAutoConnect)
+                    curFragId = (curFragId + m_fragments.Count) % m_fragments.Count;
+
+                curSampleId = remainLength.Sgn() > 0 ?
+                    0 : m_fragments[curFragId].SamplePos.Count - 1;
+            }
+            else
+            {
+                _offset = remainLength *
+                    m_fragments[curFragId].GetSampleVector(curSampleId, _speed.Sgn()).normalized;
+                remainLength = 0;
+            }
+
+            if (curFragId < 0 || curFragId >= m_fragments.Count)
+                break;
+        }
+
+        _FragId = curFragId;
+        _SampleId = curSampleId;
     }
 }
