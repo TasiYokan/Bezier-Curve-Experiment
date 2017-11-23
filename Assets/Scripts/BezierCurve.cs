@@ -79,18 +79,22 @@ public class BezierCurve : MonoBehaviour
 
     public void GetCurvePos(ref int _fragId, ref int _sampleId, float _speed, ref Vector3 _offset)
     {
+        // Get offset's projection on vector of heading. A positive value means it's on the way if you are moving with a positive speed
         float offsetLength = Vector3.Dot(
             GetSampleVectorAmongAllFrags(_fragId, _sampleId, _speed.Sgn()).normalized * _speed.Sgn(), _offset);
 
+        // It's the total movement mover should take from the startFragId and startSampleId in this frame
         float remainLength = _speed + offsetLength;
         int curFragId = _fragId;
         int curSampleId = _sampleId;
 
         while (remainLength.Sgn() != 0)
         {
+            // Cut some of the remaining length if current fragment couldn't cover the whole length
             curSampleId = m_fragments[curFragId].GetSampleId(
                 curSampleId, ref remainLength);
 
+            // If remaining length has exceed the fragment
             if (m_fragments[curFragId].WithinFragment(curSampleId + remainLength.Sgn()) == false)
             {
                 curFragId += remainLength.Sgn();
@@ -101,6 +105,7 @@ public class BezierCurve : MonoBehaviour
                 curSampleId = remainLength.Sgn() > 0 ?
                     0 : m_fragments[curFragId].SamplePos.Count - 1;
             }
+            // Remaining length can be finished at this fragment
             else
             {
                 _offset = Mathf.Abs(remainLength) *
@@ -116,6 +121,13 @@ public class BezierCurve : MonoBehaviour
         _sampleId = curSampleId;
     }
 
+    /// <summary>
+    /// Find a sample point's vector even it's on the boundary
+    /// </summary>
+    /// <param name="_fragId"></param>
+    /// <param name="_sampleId"></param>
+    /// <param name="_step"></param>
+    /// <returns></returns>
     public Vector3 GetSampleVectorAmongAllFrags(int _fragId, int _sampleId, int _step)
     {
         int fragId = _fragId;
@@ -125,7 +137,9 @@ public class BezierCurve : MonoBehaviour
         {
             if (isAutoConnect)
             {
+                // Find connected frag
                 fragId = (fragId + _step + m_fragments.Count) % m_fragments.Count;
+                // Sample point can only be the head or rear of the new fragment
                 sampleId = _step > 0 ? 0 : m_fragments[fragId].SampleCount - 1;
             }
             else

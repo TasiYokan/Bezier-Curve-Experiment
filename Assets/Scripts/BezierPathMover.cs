@@ -29,11 +29,11 @@ public class BezierPathMover : MonoBehaviour
         // For debug
         if (Input.GetKey(KeyCode.UpArrow))
         {
-            speed += 0.001f;
+            speed *= 1.01f;
         }
         else if (Input.GetKey(KeyCode.DownArrow))
         {
-            speed -= 0.001f;
+            speed *= 0.99f;
         }
         //speed = Mathf.Max(0, speed);
     }
