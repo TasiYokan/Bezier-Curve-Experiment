@@ -54,7 +54,7 @@ public class BezierFragment
         SamplePos.Clear();
         for (int i = 0; i < SampleCount; ++i)
         {
-            Vector3 pos = CalculateCubicBezierPos(i / (float)SampleCount);
+            Vector3 pos = CalculateCubicBezierPos(i / (float)(SampleCount - 1));
 
             SamplePos.Add(pos);
         }

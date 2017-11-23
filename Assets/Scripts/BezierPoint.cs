@@ -8,6 +8,7 @@ public class BezierPoint : MonoBehaviour
     private BezierHandle m_primaryHandle;
     [SerializeField]
     private BezierHandle m_secondaryHandle;
+    private BezierHandle m_activeHandle;
 
     [SerializeField]
     private bool m_isAutoSmooth;
@@ -71,6 +72,19 @@ public class BezierPoint : MonoBehaviour
         }
     }
 
+    public BezierHandle ActiveHandle
+    {
+        get
+        {
+            return m_activeHandle;
+        }
+
+        set
+        {
+            m_activeHandle = value;
+        }
+    }
+
     private void Start()
     {
     }
@@ -102,7 +116,7 @@ public class BezierPoint : MonoBehaviour
     {
         if (IsAutoSmooth)
         {
-            SmoothHandle();
+            SmoothHandle(m_activeHandle != m_secondaryHandle);
         }
     }
 }

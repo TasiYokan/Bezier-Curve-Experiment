@@ -25,9 +25,9 @@ public class BezierCurve : MonoBehaviour
         });
 
         m_fragments = new List<BezierFragment>();
-        for (int i = 0; i < m_points.Count - 1; i ++)
+        for (int i = 0; i < m_points.Count - 1; i++)
         {
-            m_fragments.Add(new BezierFragment(m_points[i], m_points[i + 1], totalSampleCount/m_points.Count));
+            m_fragments.Add(new BezierFragment(m_points[i], m_points[i + 1], totalSampleCount / m_points.Count));
         }
 
         if (isAutoConnect && m_points.Count > 1)
@@ -51,12 +51,13 @@ public class BezierCurve : MonoBehaviour
             totalPos += frag.SampleCount - 1;
         }
 
+        totalPos++;
         m_lineRenderer.positionCount = totalPos;
 
         int curPos = 0;
         for (int i = 0; i < m_fragments.Count; ++i)
         {
-            for(int j = 0; j< m_fragments[i].SamplePos.Count-1;++j)
+            for (int j = 0; j < m_fragments[i].SamplePos.Count - 1; ++j)
             {
                 m_lineRenderer.SetPosition(curPos + j, m_fragments[i].SamplePos[j]);
             }
