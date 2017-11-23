@@ -80,7 +80,7 @@ public class BezierCurve : MonoBehaviour
     public void GetCurvePos(ref int _fragId, ref int _sampleId, float _speed, ref Vector3 _offset)
     {
         float offsetLength = Vector3.Dot(
-            GetSampleVectorAmongAllFrags(_fragId, _sampleId, _speed.Sgn()).normalized, _offset);
+            GetSampleVectorAmongAllFrags(_fragId, _sampleId, _speed.Sgn()).normalized * _speed.Sgn(), _offset);
 
         float remainLength = _speed + offsetLength;
         int curFragId = _fragId;
@@ -103,8 +103,8 @@ public class BezierCurve : MonoBehaviour
             }
             else
             {
-                _offset = remainLength *
-                    m_fragments[curFragId].GetSampleVector(curSampleId, _speed.Sgn()).normalized;
+                _offset = Mathf.Abs(remainLength) *
+                    m_fragments[curFragId].GetSampleVector(curSampleId, remainLength.Sgn()).normalized;
                 remainLength = 0;
             }
 
@@ -116,7 +116,7 @@ public class BezierCurve : MonoBehaviour
         _sampleId = curSampleId;
     }
 
-    private Vector3 GetSampleVectorAmongAllFrags(int _fragId, int _sampleId, int _step)
+    public Vector3 GetSampleVectorAmongAllFrags(int _fragId, int _sampleId, int _step)
     {
         int fragId = _fragId;
         int sampleId = _sampleId;

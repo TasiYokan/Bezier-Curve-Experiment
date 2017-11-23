@@ -49,7 +49,7 @@ public class BezierPathMover : MonoBehaviour
             transform.position =
                 bezierPath.Fragments[m_curFragId].SamplePos[m_curSampleId] + m_offset;
 
-            transform.forward = bezierPath.Fragments[m_curFragId].GetSampleVector(m_curSampleId, speed.Sgn());
+            transform.forward = bezierPath.GetSampleVectorAmongAllFrags(m_curFragId, m_curSampleId, speed.Sgn());
 
             yield return null;
         }
