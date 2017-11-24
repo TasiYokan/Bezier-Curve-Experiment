@@ -19,10 +19,6 @@ public class BezierPathMover : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // Force to update position in case we change the path at runtime
-        transform.position =
-            bezierPath.Fragments[m_curFragId].SamplePos[m_curSampleId] + m_offset;
-
         // If the offset is too tiny, we could hardly notice it actually
         //Debug.DrawLine(path.CurvePoints[curId], transform.position, Color.green);
 
@@ -45,6 +41,13 @@ public class BezierPathMover : MonoBehaviour
         while (true)
         {
             bezierPath.GetCurvePos(ref m_curFragId, ref m_curSampleId, speed, ref m_offset);
+
+            if (m_curFragId < 0 || m_curFragId >= bezierPath.Fragments.Count
+                || bezierPath.Fragments[m_curFragId].WithinFragment(m_curSampleId) == false)
+            {
+                print("Has reached end");
+                yield break;
+            }
 
             transform.position =
                 bezierPath.Fragments[m_curFragId].SamplePos[m_curSampleId] + m_offset;
