@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class BezierHandle : MonoBehaviour, IDraggable
+public class BezierHandle : MonoBehaviour
 {
     private Vector3 m_position;
     private Vector3 m_dragOffset;
@@ -21,7 +21,7 @@ public class BezierHandle : MonoBehaviour, IDraggable
         }
     }
 
-    Vector3 IDraggable.DragOffset
+    Vector3 DragOffset
     {
         get
         {
@@ -34,18 +34,24 @@ public class BezierHandle : MonoBehaviour, IDraggable
         }
     }
 
-    void IDraggable.OnDragged(Vector3 _dragStartPos)
+    private void OnMouseDown()
     {
-        m_dragOffset = transform.position - _dragStartPos;
+        m_dragOffset = transform.position - GetMouseWorldPos();
         transform.parent.GetComponent<BezierPoint>().ActiveHandle = this;
     }
 
-    void IDraggable.OnDropped(Vector3 _dragEndPos)
+    private void OnMouseDrag()
     {
+        transform.position = GetMouseWorldPos() + m_dragOffset;
     }
 
-    void IDraggable.OnDragStay(Vector3 _dragCurPos)
+    private void OnMouseUp()
     {
-        transform.position = _dragCurPos + m_dragOffset;
+        
+    }
+
+    private Vector3 GetMouseWorldPos()
+    {
+        return Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0));
     }
 }
