@@ -26,14 +26,14 @@ public class DebugDragger : MonoBehaviour
         {
             isDragging = false;
 
-            target?.OnDropped(
-                Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0)));
+            //target?.OnDropped(
+            //    Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0)));
         }
 
         if (isDragging)
         {
-            target?.OnDragStay(
-                Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0)));
+            //target?.OnDragStay(
+            //    Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0)));
         }
 
     }

@@ -3,12 +3,10 @@ using System.Collections;
 
 public class BezierPoint : MonoBehaviour
 {
-    private BezierAnchor m_anchor;
-    [SerializeField]
-    private BezierHandle m_primaryHandle;
-    [SerializeField]
-    private BezierHandle m_secondaryHandle;
-    private BezierHandle m_activeHandle;
+    private BaseBezierControlPoint m_anchor;
+    public BaseBezierControlPoint primaryHandle;
+    public BaseBezierControlPoint secondaryHandle;
+    private BaseBezierControlPoint m_activeHandle;
 
     [SerializeField]
     private bool m_isAutoSmooth;
@@ -26,11 +24,11 @@ public class BezierPoint : MonoBehaviour
         }
     }
 
-    public BezierAnchor Anchor
+    public BaseBezierControlPoint Anchor
     {
         get
         {
-            if(m_anchor == null)
+            if (m_anchor == null)
                 m_anchor = GetComponentInChildren<BezierAnchor>();
             return m_anchor;
         }
@@ -41,38 +39,39 @@ public class BezierPoint : MonoBehaviour
         }
     }
 
-    public BezierHandle PrimaryHandle
+    public BaseBezierControlPoint PrimaryHandle
     {
         get
         {
-            if (m_primaryHandle == null)
-                m_primaryHandle = GetComponentInChildren<BezierHandle>();
-            return m_primaryHandle;
+            if (primaryHandle.gameObject.activeInHierarchy)
+                return primaryHandle;
+            else
+                return Anchor;
         }
 
         set
         {
-            m_primaryHandle = value;
+            primaryHandle = value;
         }
     }
 
-    public BezierHandle SecondaryHandle
+    public BaseBezierControlPoint SecondaryHandle
     {
         get
         {
-            if (m_secondaryHandle == null 
-                || m_secondaryHandle.gameObject.activeInHierarchy == false)
-                m_secondaryHandle = PrimaryHandle;
-            return m_secondaryHandle;
+            if (secondaryHandle.gameObject.activeInHierarchy)
+                return secondaryHandle;
+            else
+                return Anchor;
         }
 
         set
         {
-            m_secondaryHandle = value;
+            secondaryHandle = value;
         }
     }
 
-    public BezierHandle ActiveHandle
+    public BaseBezierControlPoint ActiveHandle
     {
         get
         {
@@ -99,7 +98,7 @@ public class BezierPoint : MonoBehaviour
     /// </summary>
     private void SmoothHandle(bool _basedOnPrimary = true)
     {
-        if (PrimaryHandle == null || SecondaryHandle == null)
+        if (PrimaryHandle == Anchor || SecondaryHandle == Anchor)
             return;
 
         if (_basedOnPrimary)
@@ -116,7 +115,7 @@ public class BezierPoint : MonoBehaviour
     {
         if (IsAutoSmooth)
         {
-            SmoothHandle(m_activeHandle != m_secondaryHandle);
+            SmoothHandle(m_activeHandle != secondaryHandle);
         }
     }
 }

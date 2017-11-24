@@ -1,57 +1,30 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class BezierHandle : MonoBehaviour
+public class BezierHandle : BaseBezierControlPoint
 {
-    private Vector3 m_position;
-    private Vector3 m_dragOffset;
-
-    public Vector3 Position
+    public override void OnMouseDown()
     {
-        get
-        {
-            m_position = transform.position;
-            return m_position;
-        }
+        base.OnMouseDown();
 
-        set
-        {
-            m_position = value;
-            transform.position = m_position;
-        }
-    }
-
-    Vector3 DragOffset
-    {
-        get
-        {
-            return m_dragOffset;
-        }
-
-        set
-        {
-            m_dragOffset = value;
-        }
-    }
-
-    private void OnMouseDown()
-    {
-        m_dragOffset = transform.position - GetMouseWorldPos();
         transform.parent.GetComponent<BezierPoint>().ActiveHandle = this;
+
+        if(Input.GetKey(KeyCode.LeftAlt)||Input.GetKey(KeyCode.RightAlt))
+        {
+            transform.parent.GetComponent<BezierPoint>().IsAutoSmooth = false;
+        }
+        if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+        {
+            transform.parent.GetComponent<BezierPoint>().IsAutoSmooth = true;
+        }
+        if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+        {
+            gameObject.SetActive(false);
+        }
     }
 
-    private void OnMouseDrag()
+    private void OnEnable()
     {
-        transform.position = GetMouseWorldPos() + m_dragOffset;
-    }
-
-    private void OnMouseUp()
-    {
-        
-    }
-
-    private Vector3 GetMouseWorldPos()
-    {
-        return Camera.main.ScreenToWorldPoint(new Vector3(Input.mousePosition.x, Input.mousePosition.y, 0));
+        //transform.parent.GetComponent<BezierPoint>().ActiveHandle = this;
     }
 }
