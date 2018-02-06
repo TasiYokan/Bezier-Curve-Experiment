@@ -233,9 +233,13 @@ public class CPC_CameraPath : MonoBehaviour
                 if (!paused)
                 {
                     currentTimeInWaypoint += Time.deltaTime / timePerSegment;
+                    Vector3 previosuPos = selectedCamera.transform.position;
                     selectedCamera.transform.position = GetBezierPosition(currentWaypointIndex, currentTimeInWaypoint);
                     if (!lookAtTarget)
-                        selectedCamera.transform.rotation = GetLerpRotation(currentWaypointIndex, currentTimeInWaypoint);
+                    {
+                        //selectedCamera.transform.rotation = GetLerpRotation(currentWaypointIndex, currentTimeInWaypoint);
+                        selectedCamera.transform.forward = selectedCamera.transform.position - previosuPos;
+                    }
                     else
                         selectedCamera.transform.rotation = Quaternion.LookRotation((target.transform.position - selectedCamera.transform.position).normalized);
                 }
